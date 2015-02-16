@@ -1,22 +1,19 @@
 import pytest
-import socket
+from echo_client import echo_client
 
 
-def test_server_text(test_socket):
-    test_socket().sendall("this is a test")
-    test_socket().shutdown(socket.SHUT_WR)
-
-    text = test_socket().recv(32)
-    test_socket().close()
-    print text
-    assert text == "this is a test"
+def test_server_text():
+    """Test that a byte string works"""
+    text = "this is a test"
+    assert echo_client(text) == text
 
 
-@pytest.fixture(scope='function')
-def test_socket():
-    test_socket = socket.socket(
-        socket.AF_INET,
-        socket.SOCK_STREAM,
-        socket.IPPROTO_IP)
-    test_socket.connect(('127.0.0.1', 50000))
-    return test_socket
+def test_server_unicode():
+    """Test that a unicode string works"""
+    text = u"this is a test"
+    assert echo_client(text) == text
+
+# def test_server_unicode():
+#     """Test that a string longer than 32 works"""
+#     text = u"this is a test of whether a string longer than 32 workds"
+#     assert echo_client(text) == text
