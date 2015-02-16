@@ -25,9 +25,8 @@ if __name__ == '__main__':
                 msg_part = conn.recv(buffsize)
                 if len(msg_part) < buffsize:
                     done = True
-                    conn.sendall(response)
-                    conn.close()
                 response += msg_part
+            conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
         pass

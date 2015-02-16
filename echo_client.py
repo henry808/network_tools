@@ -5,6 +5,7 @@ Echo Client
 """
 
 import socket
+import sys
 
 
 if __name__ == '__main__':
@@ -13,7 +14,7 @@ if __name__ == '__main__':
         socket.SOCK_STREAM,
         socket.IPPROTO_IP)
     client_socket.connect(('127.0.0.1', 50000))
-    client_socket.sendall("Hey, can you hear me?")
+    client_socket.sendall(sys.argv[1])
     client_socket.shutdown(socket.SHUT_WR)
 
     print client_socket.recv(32)
