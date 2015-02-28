@@ -31,5 +31,5 @@ def echo_client(text):
 if __name__ == '__main__':
     try:
         print echo_client(sys.argv[1])
-    except:
-        raise Exception(u"No message specified. None sent.")
+    except IndexError:
+        raise IOError(u"No message specified. None sent.")
