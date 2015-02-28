@@ -21,6 +21,7 @@ if __name__ == '__main__':
             response = ''
             done = False
             conn, addr = server_socket.accept()
+            print conn
             while not done:
                 msg_part = conn.recv(buffsize)
                 if len(msg_part) < buffsize:

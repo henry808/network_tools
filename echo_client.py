@@ -29,11 +29,7 @@ def echo_client(text):
     return text_back
 
 if __name__ == '__main__':
-    print sys.argv[0]
-    if len(sys.argv) > 1:
+    try:
         print echo_client(sys.argv[1])
-    else:
-        print "No message specified. None sent."
-
-
-
+    except:
+        raise Exception(u"No message specified. None sent.")
