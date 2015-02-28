@@ -42,6 +42,12 @@ def test_response_error():
 
 def test_parse():
     """tests parse"""
+
+
     t = parse("Test")
     assert True
 
+
+@fixture
+def good_response():
+    

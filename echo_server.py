@@ -69,18 +69,15 @@ def parse_request(request):
     Must be HTTP/1.1 requests, a request of any other protocol should
     raise an appropriate error"""
     request_list = request.split("\r\n")
-    if not 'HTTP/1.1' in request:
-        raise HTTPError
-    if not 'GET' in request:
-        raise HTTPError
-    return ""
+    # if not 'HTTP/1.1' in request:
+    #     raise HTTPError("Malformed HTTP request")
+    # if not 'GET' in request:
+    #     raise HTTPError("Not a get request")
+    return request_list
 
 
 class HTTPError(StandardError):
     pass
-
-
-raise HTTPError("Malformed HTTP request")
 
 if __name__ == '__main__':
     print response_error()
