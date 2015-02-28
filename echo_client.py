@@ -28,8 +28,19 @@ def echo_client(text):
     client_socket.close()
     return text_back
 
+
+
 if __name__ == '__main__':
     try:
         print echo_client(sys.argv[1])
     except:
         raise Exception(u"No message specified. None sent.")
+
+
+
+# Update the server loop you built for the echo server so that it:
+# gathers an incoming request
+# tries to parse the request and catches any errors raised
+# builds a "200 OK"  response if parsing worked
+# builds an appropriate HTTP error if an error was raised
+# returns the constructed response to the client.

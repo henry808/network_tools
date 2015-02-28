@@ -37,7 +37,7 @@ def echo_server():
 
 
 def response_ok():
-    """return a well formed HTTP "200 OK" response as a byte string 
+    """return a well formed HTTP "200 OK" response as a byte string
     """
     lines = [
         "HTTP/1.1 200 OK",
@@ -46,14 +46,21 @@ def response_ok():
         "<html><body><h1>Successful response.</h1></body></html>"
     ]
 
-    return "{}\r\n".format("\r\n".join(lines))
+    return "".join(["\r\n".join(lines), "\r\n"])
 
 
-def response_error():
-    """return a well formed HTTP error response (The error code and reason
-     message should be parameterized so that this function can be used in a
-      variety of situations). The response should be a byte string suitable for
-       transmission through a socket."""
+def response_error(code=400, message="Bad request"):
+    """return a well formed HTTP error response"""
+    error = " ".join([str(code), message])
+    lines = [
+        "HTTP/1.1 {}".format(error),
+        "Date : {}".format(email.utils.formatdate(usegmt=True)),
+        "Content-Type: text/xml; charset=utf-8",
+        "<html><body><h1> {} </h1></body></html>".format(error)
+    ]
+
+    return "".join(["\r\n".join(lines), "\r\n"])
+
 
 def parse_request(request):
     """parse an HTTP request and return the URI requested.
@@ -64,5 +71,5 @@ def parse_request(request):
 
 
 if __name__ == '__main__':
-    print response_ok()
+    print response_error()
     echo_server()
