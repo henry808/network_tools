@@ -1,6 +1,6 @@
 import pytest
 from echo_client import echo_client
-from echo_server import response_ok, response_error
+from echo_server import response_ok, response_error, parse
 
 
 def test_server_text():
@@ -31,6 +31,7 @@ def test_response_ok():
     """Test returns ok response"""
     assert '200 OK' in response_ok
 
+
 def test_response_error():
     """Test returns error response"""
     assert '400' in response_error()
@@ -38,4 +39,9 @@ def test_response_error():
     assert '404' in response_error(404, "Not Found")
     assert 'Not Found' in response_error(404, "Not Found")
 
+
+def test_parse():
+    """tests parse"""
+    t = parse("Test")
+    assert True
 

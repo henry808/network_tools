@@ -66,9 +66,21 @@ def parse_request(request):
     """parse an HTTP request and return the URI requested.
 
     Must be a GET requests, if not raise an appropriate Python error.
-    Must be HTTP/1.1 requests, a request of any other protocol should 
+    Must be HTTP/1.1 requests, a request of any other protocol should
     raise an appropriate error"""
+    request_list = request.split("\r\n")
+    if not 'HTTP/1.1' in request:
+        raise HTTPError
+    if not 'GET' in request:
+        raise HTTPError
+    return ""
 
+
+class HTTPError(StandardError):
+    pass
+
+
+raise HTTPError("Malformed HTTP request")
 
 if __name__ == '__main__':
     print response_error()
