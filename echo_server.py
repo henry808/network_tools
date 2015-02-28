@@ -20,8 +20,8 @@ if __name__ == '__main__':
         while True:
             response = ''
             done = False
+            conn, addr = server_socket.accept()
             while not done:
-                conn, addr = server_socket.accept()
                 msg_part = conn.recv(buffsize)
                 if len(msg_part) < buffsize:
                     done = True
