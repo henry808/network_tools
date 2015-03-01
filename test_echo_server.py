@@ -1,7 +1,7 @@
 import pytest
 from echo_client import echo_client
-from echo_server import response_ok, response_error, parse
-
+from echo_server import response_ok, response_error, parse_request
+from echo_serber import BUFFERSIZE
 
 def test_server_text():
     """Test that a byte string works"""
@@ -51,26 +51,29 @@ def test_response_error():
     assert 'Not Found' in response_error(404, "Not Found")
 
 
-def test_parse():
+def test_parse(GET_request_right_protocal,
+               GET_request_wrong_protocal,
+               POST_request_right_protocal,
+               POST_request_wrong_protocal):
     """tests parse"""
     # GET request right protocal
-    get_right =
-    assert parse(GET_request_right_protocal()) == get_right
+    get_right = ''
+    request = parse_request(GET_request_right_protocal())
+    print request
+    assert '' == get_right
     # GET request wrong protocal
     # POST request right protocal
     # POST request wrong protocal
 
-    text = parse("Test")
-    assert True
 
-
+# test requests
 @pytest.fixture(scope='function')
 def GET_request_right_protocal():
     lines = [
         "GET /index.html HTTP/1.1",
         "Host: www.test.com",
     ]
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 
 @pytest.fixture(scope='function')
@@ -79,7 +82,7 @@ def GET_request_wrong_protocal():
         "GET /index.html IMAPS",
         "Host: www.test.com",
     ]
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 
 @pytest.fixture(scope='function')
@@ -88,7 +91,7 @@ def POST_request_right_protocal():
         "POST /index.html HTTP/1.1",
         "Host: www.test.com",
     ]
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 
 @pytest.fixture(scope='function')
@@ -97,4 +100,4 @@ def POST_request_wrong_protocal():
         "POST /index.html IMAPS",
         "Host: www.test.com",
     ]
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])

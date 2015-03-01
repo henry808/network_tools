@@ -53,10 +53,10 @@ def response_ok():
         "<html><body><h1>Successful response.</h1></body></html>"
     ]
 
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 
-def response_error(code=400, message="Bad request"):
+def response_error(code=400, message="Bad Request"):
     """return a well formed HTTP error response"""
     error = " ".join([str(code), message])
     lines = [
@@ -66,21 +66,23 @@ def response_error(code=400, message="Bad request"):
         "<html><body><h1> {} </h1></body></html>".format(error)
     ]
 
-    return "".join(["\r\n".join(lines), "\r\n"])
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 
 def parse_request(request):
     """parse an HTTP request and return the URI requested.
 
-    Must be a GET requests, if not raise an appropriate Python error.
-    Must be HTTP/1.1 requests, a request of any other protocol should
-    raise an appropriate error"""
-    request_list = request.split("\r\n")
-    # if not 'HTTP/1.1' in request:
-    #     raise HTTPError("Malformed HTTP request")
-    # if not 'GET' in request:
-    #     raise HTTPError("Not a get request")
-    return request_list
+    If not a GET request raise an HTTPError.
+    If not a HTTP/1.1 request, raise an HTTPError."""
+    request_list = request.split()
+    try:
+        if request_list[0] != 'GET':
+            raise HTTPError('Not a get request.')
+        if request_list[2] != 'HTTP/1.1':
+            raise HTTPError('Not HTTP/1.1 protocal.')
+    except IndexError:
+        raise HTTPError('HTTP Request not complete.')
+    return request_list[1]
 
 
 class HTTPError(StandardError):
