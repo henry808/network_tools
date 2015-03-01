@@ -8,8 +8,10 @@ import socket
 import email.utils
 
 
+BUFFERSIZE = 32
+
+
 def echo_server():
-    """echo server echos a short string back through a socket"""
     server_socket = socket.socket(
         socket.AF_INET,
         socket.SOCK_STREAM,
@@ -17,16 +19,14 @@ def echo_server():
     server_socket.bind(('127.0.0.1', 50000))
     server_socket.listen(1)
 
-    buffsize = 32
     try:
         while True:
             response = ''
             done = False
             conn, addr = server_socket.accept()
-            print conn
             while not done:
-                msg_part = conn.recv(buffsize)
-                if len(msg_part) < buffsize:
+                msg_part = conn.recv(BUFFERSIZE)
+                if len(msg_part) < BUFFERSIZE:
                     done = True
                 response += msg_part
             conn.sendall(response)
@@ -35,6 +35,13 @@ def echo_server():
         pass
     server_socket.close()
 
+
+# Update the server loop you built for the echo server so that it:
+# gathers an incoming request
+# tries to parse the request and catches any errors raised
+# builds a "200 OK"  response if parsing worked
+# builds an appropriate HTTP error if an error was raised
+# returns the constructed response to the client.
 
 def response_ok():
     """return a well formed HTTP "200 OK" response as a byte string
