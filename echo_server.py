@@ -21,14 +21,19 @@ def echo_server():
 
     try:
         while True:
-            response = ''
+            request = ''
             done = False
             conn, addr = server_socket.accept()
             while not done:
                 msg_part = conn.recv(BUFFERSIZE)
                 if len(msg_part) < BUFFERSIZE:
                     done = True
-                response += msg_part
+                request += msg_part
+            try:
+                parsed_request = parse_request(request)
+                response = response_ok()
+            except HTTPError:
+                response = response_error()
             conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -36,8 +41,7 @@ def echo_server():
     server_socket.close()
 
 
-# Update the server loop you built for the echo server so that it:
-# gathers an incoming request
+
 # tries to parse the request and catches any errors raised
 # builds a "200 OK"  response if parsing worked
 # builds an appropriate HTTP error if an error was raised
@@ -77,16 +81,29 @@ def parse_request(request):
     request_list = request.split()
     try:
         if request_list[0] != 'GET':
-            raise HTTPError('Not a get request.')
+            raise HTTPError405('Not a GET request.')
         if request_list[2] != 'HTTP/1.1':
-            raise HTTPError('Not HTTP/1.1 protocal.')
+            raise HTTPError505('Not HTTP/1.1 protocal.')
     except IndexError:
-        raise HTTPError('HTTP Request not complete.')
+        raise HTTPError400('HTTP Request not complete.')
     return request_list[1]
 
 
 class HTTPError(StandardError):
     pass
+
+
+class HTTPError400(HTTPError):
+    pass
+
+
+class HTTPError405(HTTPError):
+    pass
+
+
+class HTTPError505(HTTPError):
+    pass
+
 
 if __name__ == '__main__':
     echo_server()

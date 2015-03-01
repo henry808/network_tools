@@ -42,15 +42,20 @@ def test_server_buffer_size_string():
 
 def test_response_ok():
     """Test returns ok response"""
-    assert '200 OK' in response_ok()
+    print response_ok()
+    assert 'HTTP/1.1 200 OK' in response_ok()
+    assert 'Content-Type: text/xml; charset=utf-8' in response_ok()
+    assert '<html><body><h1>Successful response.</h1></body></html>' in response_ok()
 
 
 def test_response_error():
     """Test returns error response"""
-    assert '400' in response_error()
-    assert 'Bad Request' in response_error()
-    assert '404' in response_error(404, "Not Found")
-    assert 'Not Found' in response_error(404, "Not Found")
+    assert "HTTP/1.1 400 Bad Request" in response_error()
+    assert "Content-Type: text/xml; charset=utf-8" in response_error()
+    assert "<html><body><h1> 400 Bad Request </h1></body></html>" in response_error()
+
+    assert "<html><body><h1> 404 Not Found </h1></body></html>" in response_error(404, "Not Found")
+
 
 
 def test_parse(empty_request,
@@ -84,12 +89,6 @@ def empty_request():
     ]
     return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
-@pytest.fixture(scope='function')
-def empty_request():
-    lines = [
-        ""
-    ]
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
 
 @pytest.fixture(scope='function')
 def GET_request_right_protocal():
