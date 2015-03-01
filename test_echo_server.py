@@ -4,6 +4,13 @@ from echo_server import response_ok, response_error, parse_request
 from echo_server import HTTPError505, HTTPError400, HTTPError405
 
 
+def test_server_200(GET_request_right_protocal):
+    """Test that a good request returns 200"""
+    text = GET_request_right_protocal
+    assert '200' in echo_client(text)
+    assert 'OK' in echo_client(text)
+
+
 def test_server_400():
     """Test that a bad request returns a 400"""
     text = ""
