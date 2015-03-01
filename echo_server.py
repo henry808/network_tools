@@ -32,8 +32,12 @@ def echo_server():
             try:
                 parsed_request = parse_request(request)
                 response = response_ok()
-            except HTTPError:
-                response = response_error()
+            except HTTPError400:
+                response = response_error(400, 'HTTP Request malformed.')
+            except HTTPError405:
+                response = response_error(405, 'Not a GET request.')
+            except HTTPError505:
+                response = response_error(505, 'Not HTTP/1.1 protocal.')
             conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -41,13 +45,7 @@ def echo_server():
     server_socket.close()
 
 
-
-# tries to parse the request and catches any errors raised
-# builds a "200 OK"  response if parsing worked
-# builds an appropriate HTTP error if an error was raised
-# returns the constructed response to the client.
-
-def response_ok():
+def response_ok(body=''):
     """return a well formed HTTP "200 OK" response as a byte string
     """
     lines = [
@@ -76,8 +74,12 @@ def response_error(code=400, message="Bad Request"):
 def parse_request(request):
     """parse an HTTP request and return the URI requested.
 
-    If not a GET request raise an HTTPError.
-    If not a HTTP/1.1 request, raise an HTTPError."""
+    If not a GET request raise an HTTPError405.
+    If not a HTTP/1.1 request, raise an HTTPError505.
+    If request is not properly formed raise an HTTPError400
+    If not GET and not HTTP/1.1 request then raise an HTTPError404
+
+    """
     request_list = request.split()
     try:
         if request_list[0] != 'GET':

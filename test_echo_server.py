@@ -1,48 +1,32 @@
 import pytest
 from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
-from echo_server import BUFFERSIZE, HTTPError
-import echo_server
+from echo_server import HTTPError505, HTTPError400, HTTPError405
 
 
-def test_server_text():
-    """Test that a byte string works"""
-    text = "this is a test"
-    assert echo_client(text) == text
-
-
-def test_server_empty():
-    """Test that an empty string works"""
+def test_server_400():
+    """Test that a bad request returns a 400"""
     text = ""
-    assert echo_client(text) == text
+    assert '400' in echo_client(text)
+    assert 'HTTP Request malformed.' in echo_client(text)
 
 
-def test_server_unicode():
-    """Test that a unicode string works"""
-    text = u"this is a test for a unicode string: \u00bd\u0553\u04e7"
-    text = text.encode('utf-8')
-    assert echo_client(text) == text
+def test_server_405(POST_request_right_protocal):
+    """Test that a non-GET request returns a 405"""
+    text = POST_request_right_protocal
+    assert '405' in echo_client(text)
+    assert 'Not a GET request.' in echo_client(text)
 
 
-def test_server_long_string():
-    """Test that a string longer than 32 works"""
-    text = u"this is a test of whether a string longer than 32 workds"
-    assert echo_client(text) == text
-
-
-def test_server_buffer_size_string():
-    """Test that a string longer than 32 works"""
-    list1 = []
-    for i in range(0, BUFFERSIZE):
-        list1.append('a')
-    text = ''.join(list1)
-    assert len(text) == BUFFERSIZE
-    assert echo_client(text) == text
+def test_server_505(GET_request_wrong_protocal):
+    """Test that a GET request with wrong protocal returns a 505"""
+    text = GET_request_wrong_protocal
+    assert '505' in echo_client(text)
+    assert 'Not HTTP/1.1 protocal.' in echo_client(text)
 
 
 def test_response_ok():
     """Test returns ok response"""
-    print response_ok()
     assert 'HTTP/1.1 200 OK' in response_ok()
     assert 'Content-Type: text/xml; charset=utf-8' in response_ok()
     assert '<html><body><h1>Successful response.</h1></body></html>' in response_ok()
@@ -57,26 +41,25 @@ def test_response_error():
     assert "<html><body><h1> 404 Not Found </h1></body></html>" in response_error(404, "Not Found")
 
 
-
 def test_parse(empty_request,
                GET_request_right_protocal,
                GET_request_wrong_protocal,
                POST_request_right_protocal,
                POST_request_wrong_protocal):
     """tests parse"""
-    # empty request raises an error
-    with pytest.raises(HTTPError):
+    # empty request raises an error: 400
+    with pytest.raises(HTTPError400):
         request = parse_request(empty_request)
-    # GET request wrong protocal
-    with pytest.raises(HTTPError):
+    # GET request wrong protocal: 505
+    with pytest.raises(HTTPError505):
         request = parse_request(GET_request_wrong_protocal)
-    # POST request right protocal
-    with pytest.raises(HTTPError):
+    # POST request right protocal: 405
+    with pytest.raises(HTTPError405):
         request = parse_request(POST_request_right_protocal)
-    # POST request wrong protocal
-    with pytest.raises(HTTPError):
+    # POST request wrong protocal: 405
+    with pytest.raises(HTTPError405):
         request = parse_request(POST_request_wrong_protocal)
-    # GET request right protocal
+    # GET request right protocal: return the URI
     request = parse_request(GET_request_right_protocal)
     assert request == "/index.html"
 
