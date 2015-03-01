@@ -52,10 +52,12 @@ def response_ok(body=''):
         "HTTP/1.1 200 OK",
         "Date : {}".format(email.utils.formatdate(usegmt=True)),
         "Content-Type: text/xml; charset=utf-8",
-        "<html><body><h1>Successful response.</h1></body></html>"
+        "",
+        "<html><body><h1>Successful response.</h1></body></html>",
+        "\r\n"
     ]
 
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
 
 
 def response_error(code=400, message="Bad Request"):
@@ -65,10 +67,13 @@ def response_error(code=400, message="Bad Request"):
         "HTTP/1.1 {}".format(error),
         "Date : {}".format(email.utils.formatdate(usegmt=True)),
         "Content-Type: text/xml; charset=utf-8",
-        "<html><body><h1> {} </h1></body></html>".format(error)
+        "",
+        "<html><body><h1> {} </h1></body></html>".format(error),
+        "\r\n"
     ]
 
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
+
 
 
 def parse_request(request):
