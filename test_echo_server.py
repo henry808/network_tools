@@ -16,14 +16,15 @@ def test_server_empty():
 
 
 def test_server_unicode():
-    """Test that a unicode string works: \u00bd\u0553\u04e7"""
-    text = u"this is a test"
+    """Test that a unicode string works:"""
+    text = u"this is a test for a unicode string: \u00bd\u0553\u04e7"
+    text = text.encode('utf-8')
     assert echo_client(text) == text
 
 
 def test_server_long_string():
     """Test that a string longer than 32 works"""
-    text = u"this is a test of whether a string longer than 32 workds"
+    text = u"this is a test of whether a string longer than 32 works"
     assert echo_client(text) == text
 
 
