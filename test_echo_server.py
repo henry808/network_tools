@@ -1,7 +1,9 @@
 import pytest
 from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
-from echo_serber import BUFFERSIZE
+from echo_server import BUFFERSIZE, HTTPError
+import echo_server
+
 
 def test_server_text():
     """Test that a byte string works"""
@@ -40,7 +42,7 @@ def test_server_buffer_size_string():
 
 def test_response_ok():
     """Test returns ok response"""
-    assert '200 OK' in response_ok
+    assert '200 OK' in response_ok()
 
 
 def test_response_error():
@@ -51,22 +53,44 @@ def test_response_error():
     assert 'Not Found' in response_error(404, "Not Found")
 
 
-def test_parse(GET_request_right_protocal,
+def test_parse(empty_request,
+               GET_request_right_protocal,
                GET_request_wrong_protocal,
                POST_request_right_protocal,
                POST_request_wrong_protocal):
     """tests parse"""
-    # GET request right protocal
-    get_right = ''
-    request = parse_request(GET_request_right_protocal())
-    print request
-    assert '' == get_right
+    # empty request raises an error
+    with pytest.raises(HTTPError):
+        request = parse_request(empty_request)
     # GET request wrong protocal
+    with pytest.raises(HTTPError):
+        request = parse_request(GET_request_wrong_protocal)
     # POST request right protocal
+    with pytest.raises(HTTPError):
+        request = parse_request(POST_request_right_protocal)
     # POST request wrong protocal
+    with pytest.raises(HTTPError):
+        request = parse_request(POST_request_wrong_protocal)
+    # GET request right protocal
+    request = parse_request(GET_request_right_protocal)
+    assert request == "/index.html"
 
 
 # test requests
+@pytest.fixture(scope='function')
+def empty_request():
+    lines = [
+        ""
+    ]
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+
+@pytest.fixture(scope='function')
+def empty_request():
+    lines = [
+        ""
+    ]
+    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+
 @pytest.fixture(scope='function')
 def GET_request_right_protocal():
     lines = [

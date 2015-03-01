@@ -89,5 +89,4 @@ class HTTPError(StandardError):
     pass
 
 if __name__ == '__main__':
-    print response_error()
     echo_server()
