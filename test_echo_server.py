@@ -6,8 +6,7 @@ from echo_server import resolve_uri, HTTPError404, HTTPError415
 import io
 
 
-
-
+# response_ok tests
 def test_response_ok_directory(directory_list):
     "directory returns list"
     uri = 'webroot'
@@ -75,6 +74,7 @@ def test_response_ok_png_image():
     assert expected_body in response
 
 
+# resolve_uri tests
 def test_resolve_uri_directory(directory_list):
     """directory"""
     uri = 'webroot'
@@ -163,6 +163,72 @@ def test_resolve_uri_non_existing_file():
     uri = 'this_file_does_not_exist.txt'
     with pytest.raises(HTTPError404):
         body, content_type = resolve_uri(uri)
+
+
+# server reponse tests
+def test_server_dir(GET_request_webroot, directory_list):
+    """Test a server resonse for a directory """
+    text = GET_request_webroot
+    assert 'HTTP/1.1 200 OK' in echo_client(text)
+    assert 'Content-Type: directory; charset=utf-8' in echo_client(text)
+    assert '' in echo_client(text)
+    assert directory_list in echo_client(text)
+
+
+def test_server_text(GET_request_text):
+    """Test a server resonse for a text file """
+    text = GET_request_text
+    uri = 'webroot/sample.txt'
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in echo_client(text)
+    assert 'Content-Type: text/plain; charset=utf-8' in echo_client(text)
+    assert 'Content-Length: {}'.format(size) in echo_client(text)
+    assert '' in echo_client(text)
+    assert expected_body in echo_client(text)
+
+
+def test_server_text(GET_request_html):
+    """Test a server resonse for an html """
+    text = GET_request_html
+    uri = 'webroot/a_web_page.html'
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in echo_client(text)
+    assert 'Content-Type: text/html; charset=utf-8' in echo_client(text)
+    assert 'Content-Length: {}'.format(size) in echo_client(text)
+    assert '' in echo_client(text)
+    assert expected_body in echo_client(text)
+
+
+def test_server_png(GET_request_png):
+    """Test a server resonse for a png"""
+    text = GET_request_png
+    uri = 'webroot/images/sample_1.png'
+    with io.open(uri, 'rb') as file1:
+        expected_body = file1.read()
+    size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in echo_client(text)
+    assert 'Content-Type: image/png; charset=utf-8' in echo_client(text)
+    assert 'Content-Length: {}'.format(size) in echo_client(text)
+    assert '' in echo_client(text)
+    assert expected_body in echo_client(text)
+
+
+def test_server_jpg(GET_request_jpg):
+    """Test a server resonse for a png"""
+    text = GET_request_jpg
+    uri = 'webroot/images/JPEG_example.jpg'
+    with io.open(uri, 'rb') as file1:
+        expected_body = file1.read()
+    size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in echo_client(text)
+    assert 'Content-Type: image/jpeg; charset=utf-8' in echo_client(text)
+    assert 'Content-Length: {}'.format(size) in echo_client(text)
+    assert '' in echo_client(text)
+    assert expected_body in echo_client(text)
 
 
 def test_server_200(GET_request_right_protocal):
@@ -259,6 +325,71 @@ def test_parse_good(GET_request_right_protocal):
 
 
 # requests used for testing
+@pytest.fixture(scope='function')
+def GET_request_webroot():
+    uri = 'webroot'
+    lines = [
+        "GET {} HTTP/1.1".format(uri),
+        "Host: www.test.com",
+        "",
+        "<body>Get this resource.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+
+@pytest.fixture(scope='function')
+def GET_request_txt():
+    uri = 'webroot/sample.txt'
+    lines = [
+        "GET {} HTTP/1.1".format(uri),
+        "Host: www.test.com",
+        "",
+        "<body>Get this resource.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+
+@pytest.fixture(scope='function')
+def GET_request_html():
+    uri = 'webroot/a_web_page.html'
+    lines = [
+        "GET {} HTTP/1.1".format(uri),
+        "Host: www.test.com",
+        "",
+        "<body>Get this resource.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+
+@pytest.fixture(scope='function')
+def GET_request_png():
+    uri = 'webroot/images/sample_1.png'
+    lines = [
+        "GET {} HTTP/1.1".format(uri),
+        "Host: www.test.com",
+        "",
+        "<body>Get this resource.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+
+@pytest.fixture(scope='function')
+def GET_request_jpg():
+    uri = 'webroot/images/JPEG_example.jpg'
+    lines = [
+        "GET {} HTTP/1.1".format(uri),
+        "Host: www.test.com",
+        "",
+        "<body>Get this resource.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+
 @pytest.fixture(scope='function')
 def empty_request():
     lines = [
