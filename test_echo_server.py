@@ -29,6 +29,46 @@ def test_resolve_uri_html():
     assert content_type == 'text/html'
 
 
+def test_resolve_uri_txt():
+    """"""
+    uri = 'webroot/sample.txt'
+    body, content_type = resolve_uri(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    assert body == expected_body
+    assert content_type == 'text/plain'
+
+
+def test_resolve_uri_jpg_small():
+    """"""
+    uri = 'webroot/images/JPEG_example.jpg'
+    body, content_type = resolve_uri(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    assert body == expected_body
+    assert content_type == 'image/jpeg'
+
+
+def test_resolve_uri_jpg_big():
+    """"""
+    uri = 'webroot/images/Sample_Scene_Balls.jpg'
+    body, content_type = resolve_uri(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    assert body == expected_body
+    assert content_type == 'image/jpeg'
+
+
+def test_resolve_uri_jpg_big():
+    """"""
+    uri = 'webroot/images/sample_1.png'
+    body, content_type = resolve_uri(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    assert body == expected_body
+    assert content_type == 'image/png'
+
+
 def test_server_200(GET_request_right_protocal):
     """Test that a good request returns 200"""
     text = GET_request_right_protocal
