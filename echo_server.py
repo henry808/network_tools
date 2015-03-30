@@ -11,7 +11,9 @@ import os
 import mimetypes
 
 BUFFERSIZE = 32
-ROOT_DIR = "./"
+# This is not a secure solution because a client could look at any directory 
+# using commands like ../ to get above the root
+ROOT_DIR = "webroot/"
 
 def echo_server():
     server_socket = socket.socket(
@@ -61,11 +63,10 @@ def resolve_uri(uri):
     Raises an IO error if the uri is not a file or directory.
     Raises an IO error if cannot find a mimetype.
     """
-    if not isinstance(uri, str) or uri == '':
+    if not isinstance(uri, str):
         raise HTTPError404('Not found')
     uri = os.path.join(ROOT_DIR, uri)
     extension = os.path.splitext(uri)
-    print "uri and extension: " + str(uri) + " " + str(extension)
     try:
         content_type = mimetypes.types_map[extension[1]]
     except KeyError:
