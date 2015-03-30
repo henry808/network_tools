@@ -7,7 +7,7 @@ Echo Server
 import socket
 import email.utils
 import io
-
+import os
 
 BUFFERSIZE = 32
 
@@ -49,14 +49,40 @@ def echo_server():
 def resolve_uri(uri):
     """Given a URI, return a body and content type.
 
-    If the URI is a directory, return that directory as the body.
+    If the URI is a directory, return that directory as a list as the body.
     If the URI a file, return the contents of the file as the body
     Content type is the file type.
-    Raises an appropriate error if content not found.
+    Raises type error if uri is not a string.
+    Raises an IO error if the uri is not a file or directory.
     """
-    uri_split = uri.split('.')
+    if not isinstance(uri, str):
+        raise TypeError('URI not a string: ' + str(uri))
+    if os.path.isfile(uri):  # if uri is a file
+        uri_split = uri.split('.')
+        extension = uri_split[-1]
+        if extension == 'jpeg' or extension == 'jpg':
+            content_type = 'image/jpeg'
+        elif extension == 'png':
+            content_type = 'image/png'
+        elif extension == 'txt':
+            content_type = 'text/plain'
+        elif extension == 'html' or extension == 'htm':
+            content_type = 'text/html'
+
+    elif os.path.isdir(uri):  # if uri is a directory
+        content_type = 'directory'
+        dir_list = os.listdir(uri)
+        for index, item in enumerate(dir_list):
+            dir_list[index] = "<li>{}</li>".format(item)
+        body = "<ul>{}</ul>".format("".join(dir_list))
+    else:  # if uri is not a dir or a file
+        raise IOError('Not a file or directory.')
+
+
+
     body = ''
-    content_type = ''
+    if len(uri_split) > 1:
+        pass
     return body, content_type
 
 
