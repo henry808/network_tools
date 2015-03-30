@@ -86,7 +86,6 @@ def parse_request(request):
 
     """
     request_list = request.split("\r\n")
-    print request_list
     try:
         # if GET is not the first word on first line, 405
         if request_list[0].split()[0] != 'GET':

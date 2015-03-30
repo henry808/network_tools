@@ -62,25 +62,44 @@ def test_response_error():
     assert "<html><body><h1> 404 Not Found </h1></body></html>" in response_error(404, "Not Found")
 
 
-def test_parse(empty_request,
-               GET_request_right_protocal,
-               GET_request_wrong_protocal,
-               POST_request_right_protocal,
-               POST_request_wrong_protocal):
-    """tests parse"""
-    # empty request raises an error: 400
+def test_parse(empty_request):
+    """empty request raises an error: 400"""
     with pytest.raises(HTTPError400):
         request = parse_request(empty_request)
-    # GET request wrong protocal: 505
+
+
+def test_parse_no_empty_line(GET_request_missing_blank_line_before_body):
+    """no empty line before body request raises an error: 400"""
+    with pytest.raises(HTTPError400):
+        request = parse_request(GET_request_missing_blank_line_before_body)
+
+
+def test_parse_no_body(GET_request_is_missing_a_body):
+    """no body request raises an error: 400"""
+    with pytest.raises(HTTPError400):
+        request = parse_request(GET_request_is_missing_a_body)
+
+
+def test_parse_wrong_protocao(GET_request_wrong_protocal):
+    """GET request wrong protocal: 505"""
     with pytest.raises(HTTPError505):
         request = parse_request(GET_request_wrong_protocal)
-    # POST request right protocal: 405
+
+
+def test_parse_post_request_right_protocal(POST_request_right_protocal):
+    """POST request right protocal: 405"""
     with pytest.raises(HTTPError405):
         request = parse_request(POST_request_right_protocal)
-    # POST request wrong protocal: 405
+
+
+def test_parse_wrong protocal(POST_request_wrong_protocal):
+    """POST request wrong protocal: 405"""
     with pytest.raises(HTTPError405):
         request = parse_request(POST_request_wrong_protocal)
-    # GET request right protocal: return the URI
+
+
+def test_parse_good(GET_request_right_protocal):
+    """GET request right protocal: return the URI"""
     request = parse_request(GET_request_right_protocal)
     assert request == "/index.html"
 
