@@ -18,6 +18,20 @@ def test_server_400():
     assert 'HTTP Request malformed.' in echo_client(text)
 
 
+def test_server_missing_blank_line(GET_request_missing_blank_line_before_body):
+    """Test that a request missing a blank line returns a 400"""
+    text = GET_request_missing_blank_line_before_body
+    assert '400' in echo_client(text)
+    assert 'HTTP Request malformed.' in echo_client(text)
+
+
+def test_server_missing_body(GET_request_is_missing_a_body):
+    """Test that a request missing a body returns a 400"""
+    text = GET_request_is_missing_a_body
+    assert '400' in echo_client(text)
+    assert 'HTTP Request malformed.' in echo_client(text)
+
+
 def test_server_405(POST_request_right_protocal):
     """Test that a non-GET request returns a 405"""
     text = POST_request_right_protocal
@@ -85,8 +99,11 @@ def GET_request_right_protocal():
     lines = [
         "GET /index.html HTTP/1.1",
         "Host: www.test.com",
+        "",
+        "<body>This is a legal request</body>",
+        "\r\n"
     ]
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
 
 
 @pytest.fixture(scope='function')
@@ -94,8 +111,11 @@ def GET_request_wrong_protocal():
     lines = [
         "GET /index.html IMAPS",
         "Host: www.test.com",
+        "",
+        "This test had a bad protocal",
+        "\r\n"
     ]
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
 
 
 @pytest.fixture(scope='function')
@@ -103,8 +123,11 @@ def POST_request_right_protocal():
     lines = [
         "POST /index.html HTTP/1.1",
         "Host: www.test.com",
+        "",
+        "This test is a well formed POST request.",
+        "\r\n"
     ]
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
 
 
 @pytest.fixture(scope='function')
@@ -112,5 +135,29 @@ def POST_request_wrong_protocal():
     lines = [
         "POST /index.html IMAPS",
         "Host: www.test.com",
+        "",
+        "This request is a POST Request with a bad protocal.",
+        "\r\n"
     ]
-    return "".join(["\r\n".join(lines), "\r\n\r\n"])
+    return "\r\n".join(lines)
+
+@pytest.fixture(scope='function')
+def GET_request_missing_blank_line_before_body():
+    lines = [
+        "GET /index.html HTTP/1.1",
+        "Host: www.test.com",
+        "<body>This is a malformed request missing a blank line.</body>",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
+
+@pytest.fixture(scope='function')
+def GET_request_is_missing_a_body():
+    lines = [
+        "GET /index.html HTTP/1.1",
+        "Host: www.test.com",
+        "<body>This is a malformed request missing a blank line.</body>",
+        "",
+        "\r\n"
+    ]
+    return "\r\n".join(lines)
