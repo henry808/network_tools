@@ -10,7 +10,7 @@ def test_resolve_uri_directory():
     """directory"""
     uri = 'webroot'
     body, content_type = resolve_uri(uri)
-    listing = ['a_web_page.html', 'images', 'make_time.py', 'sample.txt']
+    listing = ['.DS_Store', 'a_web_page.html', 'images', 'make_time.py', 'sample.txt']
     for index, item in enumerate(listing):
         listing[index] = "<li>{}</li>".format(item)
     expected_body = "<ul>{}</ul>".format("".join(listing))
@@ -43,7 +43,7 @@ def test_resolve_uri_jpg_small():
     """small jpeg content type"""
     uri = 'webroot/images/JPEG_example.jpg'
     body, content_type = resolve_uri(uri)
-    with io.open(uri, 'r') as file1:
+    with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
     assert content_type == 'image/jpeg'
@@ -53,7 +53,7 @@ def test_resolve_uri_jpg_big():
     """big content type"""
     uri = 'webroot/images/Sample_Scene_Balls.jpg'
     body, content_type = resolve_uri(uri)
-    with io.open(uri, 'r') as file1:
+    with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
     assert content_type == 'image/jpeg'
@@ -63,7 +63,7 @@ def test_resolve_uri_png():
     """png content type"""
     uri = 'webroot/images/sample_1.png'
     body, content_type = resolve_uri(uri)
-    with io.open(uri, 'r') as file1:
+    with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
     assert content_type == 'image/png'

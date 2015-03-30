@@ -62,13 +62,20 @@ def resolve_uri(uri):
         extension = uri_split[-1]
         if extension == 'jpeg' or extension == 'jpg':
             content_type = 'image/jpeg'
+            with io.open(uri, 'rb') as file1:
+                body = file1.read()
         elif extension == 'png':
             content_type = 'image/png'
+            with io.open(uri, 'rb') as file1:
+                body = file1.read()
         elif extension == 'txt':
             content_type = 'text/plain'
+            with io.open(uri, 'r') as file1:
+                body = file1.read()
         elif extension == 'html' or extension == 'htm':
             content_type = 'text/html'
-
+            with io.open(uri, 'r') as file1:
+                body = file1.read()
     elif os.path.isdir(uri):  # if uri is a directory
         content_type = 'directory'
         dir_list = os.listdir(uri)
@@ -77,16 +84,10 @@ def resolve_uri(uri):
         body = "<ul>{}</ul>".format("".join(dir_list))
     else:  # if uri is not a dir or a file
         raise IOError('Not a file or directory.')
-
-
-
-    body = ''
-    if len(uri_split) > 1:
-        pass
     return body, content_type
 
 
-def response_ok(body='', content=''):
+def response_ok(body='', content_type=''):
     """return a well formed HTTP "200 OK" response as a byte string
     """
 
@@ -96,7 +97,7 @@ def response_ok(body='', content=''):
     lines = [
         "HTTP/1.1 200 OK",
         "Date : {}".format(email.utils.formatdate(usegmt=True)),
-        "Content-Type: text/xml; charset=utf-8",
+        "Content-Type: {}; charset=utf-8".format(content_type),
         "",
         body,
         "\r\n"
