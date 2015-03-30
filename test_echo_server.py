@@ -70,9 +70,9 @@ def test_resolve_uri_png():
 
 
 def test_resolve_uri_empty_string():
-    """empty string error"""
+    """empty string io error"""
     uri = ''
-    with pytest.raises(TypeError):
+    with pytest.raises(IOError):
         body, content_type = resolve_uri(uri)
 
 
@@ -80,6 +80,15 @@ def test_resolve_uri_non_string():
     """non string error"""
     uri = 333
     with pytest.raises(TypeError):
+        body, content_type = resolve_uri(uri)
+    uri = {'notstring': 'not a string'}
+    with pytest.raises(TypeError):
+        body, content_type = resolve_uri(uri)
+
+def test_resolve_uri_non_existing_file():
+    """file or directory does not exist error"""
+    uri = 'this_file_does_not_exist.txt'
+    with pytest.raises(IOError):
         body, content_type = resolve_uri(uri)
 
 
