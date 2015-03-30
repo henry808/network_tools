@@ -8,6 +8,7 @@ import socket
 import email.utils
 import io
 import os
+import mimetypes
 
 BUFFERSIZE = 32
 
@@ -54,28 +55,21 @@ def resolve_uri(uri):
     Content type is the file type.
     Raises type error if uri is not a string.
     Raises an IO error if the uri is not a file or directory.
+    Raises an IO error if cannot find a mimetype.
     """
     if not isinstance(uri, str):
         raise TypeError('URI not a string: ' + str(uri))
     if os.path.isfile(uri):  # if uri is a file
-        uri_split = uri.split('.')
-        extension = uri_split[-1]
-        if extension == 'jpeg' or extension == 'jpg':
-            content_type = 'image/jpeg'
-            with io.open(uri, 'rb') as file1:
-                body = file1.read()
-        elif extension == 'png':
-            content_type = 'image/png'
-            with io.open(uri, 'rb') as file1:
-                body = file1.read()
-        elif extension == 'txt':
-            content_type = 'text/plain'
-            with io.open(uri, 'r') as file1:
-                body = file1.read()
-        elif extension == 'html' or extension == 'htm':
-            content_type = 'text/html'
-            with io.open(uri, 'r') as file1:
-                body = file1.read()
+        extension = os.path.splitext(uri)
+        content_type = mimetypes.types_map[extension[1]]
+        if content_type == 'text/plain' or content_type == 'text/html':
+                with io.open(uri, 'r') as file1:
+                    body = file1.read()  
+        elif content_type == 'image/jpeg' or content_type == 'image/png':
+                with io.open(uri, 'rb') as file1:
+                    body = file1.read()
+        else:
+            raise IOError('Do not recognize mimetype.')
     elif os.path.isdir(uri):  # if uri is a directory
         content_type = 'directory'
         dir_list = os.listdir(uri)
@@ -90,14 +84,15 @@ def resolve_uri(uri):
 def response_ok(body='', content_type=''):
     """return a well formed HTTP "200 OK" response as a byte string
     """
+    if content_type == 'text/plain' or content_type == 'text/html':
+        content_type = "".join(content_type, '; charset=utf-8')
+        body = body.encode('utf-8')
 
-    # filename = ''
-
-    # if content_type
     lines = [
         "HTTP/1.1 200 OK",
         "Date : {}".format(email.utils.formatdate(usegmt=True)),
         "Content-Type: {}; charset=utf-8".format(content_type),
+        "Content-Length: {}".format(len(body)),
         "",
         body,
         "\r\n"
