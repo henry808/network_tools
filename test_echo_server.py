@@ -36,14 +36,14 @@ def test_server_405(POST_request_right_protocal):
     """Test that a non-GET request returns a 405"""
     text = POST_request_right_protocal
     assert '405' in echo_client(text)
-    assert 'Method Not Allowed' in echo_client(text)
+    assert 'Method not allowed' in echo_client(text)
 
 
 def test_server_505(GET_request_wrong_protocal):
     """Test that a GET request with wrong protocal returns a 505"""
     text = GET_request_wrong_protocal
     assert '505' in echo_client(text)
-    assert 'HTTP Version Not Supported' in echo_client(text)
+    assert 'HTTP version not supported' in echo_client(text)
 
 
 def test_response_ok():

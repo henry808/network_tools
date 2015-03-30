@@ -35,9 +35,9 @@ def echo_server():
             except HTTPError400:
                 response = response_error(400, 'Bad Request')
             except HTTPError405:
-                response = response_error(405, 'Method Not Allowed')
+                response = response_error(405, 'Method not allowed')
             except HTTPError505:
-                response = response_error(505, 'HTTP Version Not Supported.')
+                response = response_error(505, 'HTTP version not supported')
             conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -85,16 +85,25 @@ def parse_request(request):
     If not GET and not HTTP/1.1 request then raise an HTTPError404
 
     """
-    request_list = request.split()
+    request_list = request.split("\r\n")
     print request_list
     try:
-        if request_list[0] != 'GET':
-            raise HTTPError405('Method Not Allowed')
-        if request_list[2] != 'HTTP/1.1':
-            raise HTTPError505('HTTP Version Not Supported')
+        # if GET is not the first word on first line, 405
+        if request_list[0].split()[0] != 'GET':
+            raise HTTPError405('Method not allowed')
+        # if HTTP/1.1 is not the third word on first line, 505
+        if request_list[0].split()[2] != 'HTTP/1.1':
+            raise HTTPError505('HTTP version not supported')
+        # if the fourth line is not an empty string, 400
+        if request_list[3] == '':
+            raise HTTPError400('Bad Request')
+        # See if a fifth line exists, if not, we are out of index
+        # This is where the body shoud be.
+        body = request_list[5]
     except IndexError:
+        # if there is missing info, then it's a bad request for sure
         raise HTTPError400('Bad Request')
-    return request_list[1]
+    return request_list[0].split()[1]
 
 
 class HTTPError(StandardError):
