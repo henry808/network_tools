@@ -6,6 +6,7 @@ Echo Server
 
 import socket
 import email.utils
+import io
 
 
 BUFFERSIZE = 32
@@ -45,15 +46,33 @@ def echo_server():
     server_socket.close()
 
 
-def response_ok(body=''):
+def resolve_uri(uri):
+    """Given a URI, return a body and content type.
+
+    If the URI is a directory, return that directory as the body.
+    If the URI a file, return the contents of the file as the body
+    Content type is the file type.
+    Raises an appropriate error if content not found.
+    """
+    uri_split = uri.split('.')
+    body = ''
+    content_type = ''
+    return body, content_type
+
+
+def response_ok(body='', content=''):
     """return a well formed HTTP "200 OK" response as a byte string
     """
+
+    # filename = ''
+
+    # if content_type
     lines = [
         "HTTP/1.1 200 OK",
         "Date : {}".format(email.utils.formatdate(usegmt=True)),
         "Content-Type: text/xml; charset=utf-8",
         "",
-        "<html><body><h1>Successful response.</h1></body></html>",
+        body,
         "\r\n"
     ]
 
