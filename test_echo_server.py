@@ -3,13 +3,15 @@ from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
 from echo_server import HTTPError505, HTTPError400, HTTPError405
 from echo_server import resolve_uri, HTTPError404, HTTPError415
+from echo_server import ROOT_DIR
 import io
+import os
 
 
 # response_ok tests
 def test_response_ok_directory(directory_list):
     "directory returns list"
-    uri = 'webroot'
+    uri = ''
     response = response_ok(uri)
     dir_list = directory_list
     assert 'HTTP/1.1 200 OK' in response
@@ -20,8 +22,9 @@ def test_response_ok_directory(directory_list):
 
 def test_response_ok_text():
     "text file"
-    uri = 'webroot/sample.txt'
+    uri = 'sample.txt'
     response = response_ok(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
         size = len(expected_body)
@@ -34,8 +37,9 @@ def test_response_ok_text():
 
 def test_response_ok_html():
     "text file"
-    uri = 'webroot/a_web_page.html'
+    uri = 'a_web_page.html'
     response = response_ok(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
         size = len(expected_body)
@@ -48,8 +52,9 @@ def test_response_ok_html():
 
 def test_response_ok_jpg_image():
     "jpg file"
-    uri = 'webroot/images/JPEG_example.jpg'
+    uri = 'images/JPEG_example.jpg'
     response = response_ok(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
         size = len(expected_body)
@@ -62,8 +67,9 @@ def test_response_ok_jpg_image():
 
 def test_response_ok_png_image():
     "png file"
-    uri = 'webroot/images/sample_1.png'
+    uri = 'images/sample_1.png'
     response = response_ok(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
         size = len(expected_body)
@@ -77,7 +83,7 @@ def test_response_ok_png_image():
 # resolve_uri tests
 def test_resolve_uri_directory(directory_list):
     """directory"""
-    uri = 'webroot'
+    uri = ''
     body, content_type = resolve_uri(uri)
     expected_body = directory_list
     assert body == expected_body
@@ -86,8 +92,9 @@ def test_resolve_uri_directory(directory_list):
 
 def test_resolve_uri_html():
     """html content type"""
-    uri = 'webroot/a_web_page.html'
+    uri = 'a_web_page.html'
     body, content_type = resolve_uri(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
     assert body == expected_body
@@ -96,8 +103,9 @@ def test_resolve_uri_html():
 
 def test_resolve_uri_txt():
     """text content type"""
-    uri = 'webroot/sample.txt'
+    uri = 'sample.txt'
     body, content_type = resolve_uri(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
     assert body == expected_body
@@ -106,8 +114,9 @@ def test_resolve_uri_txt():
 
 def test_resolve_uri_jpg_small():
     """small jpeg content type"""
-    uri = 'webroot/images/JPEG_example.jpg'
+    uri = 'images/JPEG_example.jpg'
     body, content_type = resolve_uri(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
@@ -116,8 +125,9 @@ def test_resolve_uri_jpg_small():
 
 def test_resolve_uri_jpg_big():
     """big content type"""
-    uri = 'webroot/images/Sample_Scene_Balls.jpg'
+    uri = 'images/Sample_Scene_Balls.jpg'
     body, content_type = resolve_uri(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
@@ -126,24 +136,18 @@ def test_resolve_uri_jpg_big():
 
 def test_resolve_uri_png():
     """png content type"""
-    uri = 'webroot/images/sample_1.png'
+    uri = 'images/sample_1.png'
     body, content_type = resolve_uri(uri)
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     assert body == expected_body
     assert content_type == 'image/png'
 
 
-def test_resolve_uri_empty_string():
-    """empty string io error"""
-    uri = ''
-    with pytest.raises(HTTPError404):
-        body, content_type = resolve_uri(uri)
-
-
 def test_resolve_uri_unsupported_mimetype():
     """non string error"""
-    uri = 'webroot/images/test.gif'
+    uri = 'images/test.gif'
     with pytest.raises(HTTPError415):
         body, content_type = resolve_uri(uri)
 
@@ -178,7 +182,8 @@ def test_server_dir(GET_request_webroot, directory_list):
 def test_server_text(GET_request_text):
     """Test a server resonse for a text file """
     text = GET_request_text
-    uri = 'webroot/sample.txt'
+    uri = 'sample.txt'
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
     size = len(expected_body)
@@ -192,7 +197,8 @@ def test_server_text(GET_request_text):
 def test_server_text(GET_request_html):
     """Test a server resonse for an html """
     text = GET_request_html
-    uri = 'webroot/a_web_page.html'
+    uri = 'a_web_page.html'
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
     size = len(expected_body)
@@ -206,7 +212,8 @@ def test_server_text(GET_request_html):
 def test_server_png(GET_request_png):
     """Test a server resonse for a png"""
     text = GET_request_png
-    uri = 'webroot/images/sample_1.png'
+    uri = 'images/sample_1.png'
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     size = len(expected_body)
@@ -220,7 +227,8 @@ def test_server_png(GET_request_png):
 def test_server_jpg(GET_request_jpg):
     """Test a server resonse for a png"""
     text = GET_request_jpg
-    uri = 'webroot/images/JPEG_example.jpg'
+    uri = 'images/JPEG_example.jpg'
+    uri = os.path.join(ROOT_DIR, uri)
     with io.open(uri, 'rb') as file1:
         expected_body = file1.read()
     size = len(expected_body)
@@ -321,13 +329,13 @@ def test_parse_wrong_protocal(POST_request_wrong_protocal):
 def test_parse_good(GET_request_right_protocal):
     """GET request right protocal: return the URI"""
     request = parse_request(GET_request_right_protocal)
-    assert request == "webroot/sample.txt"
+    assert request == "sample.txt"
 
 
 # requests used for testing
 @pytest.fixture(scope='function')
 def GET_request_webroot():
-    uri = 'webroot'
+    uri = './'
     lines = [
         "GET {} HTTP/1.1".format(uri),
         "Host: www.test.com",
@@ -340,7 +348,7 @@ def GET_request_webroot():
 
 @pytest.fixture(scope='function')
 def GET_request_txt():
-    uri = 'webroot/sample.txt'
+    uri = 'sample.txt'
     lines = [
         "GET {} HTTP/1.1".format(uri),
         "Host: www.test.com",
@@ -353,7 +361,7 @@ def GET_request_txt():
 
 @pytest.fixture(scope='function')
 def GET_request_html():
-    uri = 'webroot/a_web_page.html'
+    uri = 'a_web_page.html'
     lines = [
         "GET {} HTTP/1.1".format(uri),
         "Host: www.test.com",
@@ -366,7 +374,7 @@ def GET_request_html():
 
 @pytest.fixture(scope='function')
 def GET_request_png():
-    uri = 'webroot/images/sample_1.png'
+    uri = 'images/sample_1.png'
     lines = [
         "GET {} HTTP/1.1".format(uri),
         "Host: www.test.com",
@@ -379,7 +387,7 @@ def GET_request_png():
 
 @pytest.fixture(scope='function')
 def GET_request_jpg():
-    uri = 'webroot/images/JPEG_example.jpg'
+    uri = 'images/JPEG_example.jpg'
     lines = [
         "GET {} HTTP/1.1".format(uri),
         "Host: www.test.com",
@@ -401,7 +409,7 @@ def empty_request():
 @pytest.fixture(scope='function')
 def GET_request_right_protocal():
     lines = [
-        "GET webroot/sample.txt HTTP/1.1",
+        "GET sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "<body>This is a legal request</body>",
@@ -413,7 +421,7 @@ def GET_request_right_protocal():
 @pytest.fixture(scope='function')
 def GET_request_wrong_protocal():
     lines = [
-        "GET webroot/sample.txt IMAPS",
+        "GET sample.txt IMAPS",
         "Host: www.test.com",
         "",
         "This test had a bad protocal",
@@ -425,7 +433,7 @@ def GET_request_wrong_protocal():
 @pytest.fixture(scope='function')
 def POST_request_right_protocal():
     lines = [
-        "POST webroot/sample.txt HTTP/1.1",
+        "POST sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "This test is a well formed POST request.",
@@ -437,7 +445,7 @@ def POST_request_right_protocal():
 @pytest.fixture(scope='function')
 def POST_request_wrong_protocal():
     lines = [
-        "POST webroot/sample.txt IMAPS",
+        "POST sample.txt IMAPS",
         "Host: www.test.com",
         "",
         "This request is a POST Request with a bad protocal.",
@@ -449,7 +457,7 @@ def POST_request_wrong_protocal():
 @pytest.fixture(scope='function')
 def GET_request_missing_blank_line_before_body():
     lines = [
-        "GET webroot/sample.txt HTTP/1.1",
+        "GET sample.txt HTTP/1.1",
         "Host: www.test.com",
         "<body>This is a malformed request missing a blank line.</body>",
         "\r\n"
@@ -460,7 +468,7 @@ def GET_request_missing_blank_line_before_body():
 @pytest.fixture(scope='function')
 def GET_request_is_missing_a_body():
     lines = [
-        "GET webroot/sample.txt HTTP/1.1",
+        "GET sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "\r\n"
