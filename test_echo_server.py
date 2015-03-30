@@ -3,6 +3,8 @@ from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
 from echo_server import HTTPError505, HTTPError400, HTTPError405
 from echo_server import resolve_uri
+import io
+
 
 def test_resolve_uri_directory():
     """"""
@@ -15,6 +17,17 @@ def test_resolve_uri_directory():
     print expected_body
     assert body == expected_body
     assert content_type == 'directory'
+
+
+def test_resolve_uri_html():
+    """"""
+    uri = 'webroot/a_web_page.html'
+    body, content_type = resolve_uri(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+    assert body == expected_body
+    assert content_type == 'text/html'
+
 
 def test_server_200(GET_request_right_protocal):
     """Test that a good request returns 200"""
