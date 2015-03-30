@@ -92,7 +92,7 @@ def test_parse_post_request_right_protocal(POST_request_right_protocal):
         request = parse_request(POST_request_right_protocal)
 
 
-def test_parse_wrong protocal(POST_request_wrong_protocal):
+def test_parse_wrong_protocal(POST_request_wrong_protocal):
     """POST request wrong protocal: 405"""
     with pytest.raises(HTTPError405):
         request = parse_request(POST_request_wrong_protocal)
