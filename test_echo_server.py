@@ -15,35 +15,35 @@ def test_server_400():
     """Test that a bad request returns a 400"""
     text = ""
     assert '400' in echo_client(text)
-    assert 'HTTP Request malformed.' in echo_client(text)
+    assert 'Bad Request' in echo_client(text)
 
 
 def test_server_missing_blank_line(GET_request_missing_blank_line_before_body):
     """Test that a request missing a blank line returns a 400"""
     text = GET_request_missing_blank_line_before_body
     assert '400' in echo_client(text)
-    assert 'HTTP Request malformed.' in echo_client(text)
+    assert 'Bad Request' in echo_client(text)
 
 
 def test_server_missing_body(GET_request_is_missing_a_body):
     """Test that a request missing a body returns a 400"""
     text = GET_request_is_missing_a_body
     assert '400' in echo_client(text)
-    assert 'HTTP Request malformed.' in echo_client(text)
+    assert 'Bad Request' in echo_client(text)
 
 
 def test_server_405(POST_request_right_protocal):
     """Test that a non-GET request returns a 405"""
     text = POST_request_right_protocal
     assert '405' in echo_client(text)
-    assert 'Not a GET request.' in echo_client(text)
+    assert 'Method Not Allowed' in echo_client(text)
 
 
 def test_server_505(GET_request_wrong_protocal):
     """Test that a GET request with wrong protocal returns a 505"""
     text = GET_request_wrong_protocal
     assert '505' in echo_client(text)
-    assert 'Not HTTP/1.1 protocal.' in echo_client(text)
+    assert 'HTTP Version Not Supported' in echo_client(text)
 
 
 def test_response_ok():
@@ -85,7 +85,7 @@ def test_parse(empty_request,
     assert request == "/index.html"
 
 
-# test requests
+# requests used for testing
 @pytest.fixture(scope='function')
 def empty_request():
     lines = [
@@ -156,7 +156,6 @@ def GET_request_is_missing_a_body():
     lines = [
         "GET /index.html HTTP/1.1",
         "Host: www.test.com",
-        "<body>This is a malformed request missing a blank line.</body>",
         "",
         "\r\n"
     ]

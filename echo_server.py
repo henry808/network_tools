@@ -33,11 +33,11 @@ def echo_server():
                 parsed_request = parse_request(request)
                 response = response_ok()
             except HTTPError400:
-                response = response_error(400, 'HTTP Request malformed.')
+                response = response_error(400, 'Bad Request')
             except HTTPError405:
-                response = response_error(405, 'Not a GET request.')
+                response = response_error(405, 'Method Not Allowed')
             except HTTPError505:
-                response = response_error(505, 'Not HTTP/1.1 protocal.')
+                response = response_error(505, 'HTTP Version Not Supported.')
             conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -86,13 +86,14 @@ def parse_request(request):
 
     """
     request_list = request.split()
+    print request_list
     try:
         if request_list[0] != 'GET':
-            raise HTTPError405('Not a GET request.')
+            raise HTTPError405('Method Not Allowed')
         if request_list[2] != 'HTTP/1.1':
-            raise HTTPError505('Not HTTP/1.1 protocal.')
+            raise HTTPError505('HTTP Version Not Supported')
     except IndexError:
-        raise HTTPError400('HTTP Request not complete.')
+        raise HTTPError400('Bad Request')
     return request_list[1]
 
 
