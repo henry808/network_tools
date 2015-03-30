@@ -7,7 +7,7 @@ import io
 
 
 def test_resolve_uri_directory():
-    """"""
+    """directory"""
     uri = 'webroot'
     body, content_type = resolve_uri(uri)
     listing = ['a_web_page.html', 'images', 'make_time.py', 'sample.txt']
@@ -20,7 +20,7 @@ def test_resolve_uri_directory():
 
 
 def test_resolve_uri_html():
-    """"""
+    """html content type"""
     uri = 'webroot/a_web_page.html'
     body, content_type = resolve_uri(uri)
     with io.open(uri, 'r') as file1:
@@ -30,7 +30,7 @@ def test_resolve_uri_html():
 
 
 def test_resolve_uri_txt():
-    """"""
+    """text content type"""
     uri = 'webroot/sample.txt'
     body, content_type = resolve_uri(uri)
     with io.open(uri, 'r') as file1:
@@ -40,7 +40,7 @@ def test_resolve_uri_txt():
 
 
 def test_resolve_uri_jpg_small():
-    """"""
+    """small jpeg content type"""
     uri = 'webroot/images/JPEG_example.jpg'
     body, content_type = resolve_uri(uri)
     with io.open(uri, 'r') as file1:
@@ -50,7 +50,7 @@ def test_resolve_uri_jpg_small():
 
 
 def test_resolve_uri_jpg_big():
-    """"""
+    """big content type"""
     uri = 'webroot/images/Sample_Scene_Balls.jpg'
     body, content_type = resolve_uri(uri)
     with io.open(uri, 'r') as file1:
@@ -59,14 +59,28 @@ def test_resolve_uri_jpg_big():
     assert content_type == 'image/jpeg'
 
 
-def test_resolve_uri_jpg_big():
-    """"""
+def test_resolve_uri_png():
+    """png content type"""
     uri = 'webroot/images/sample_1.png'
     body, content_type = resolve_uri(uri)
     with io.open(uri, 'r') as file1:
         expected_body = file1.read()
     assert body == expected_body
     assert content_type == 'image/png'
+
+
+def test_resolve_uri_empty_string():
+    """empty string error"""
+    uri = ''
+    with pytest.raises(TypeError):
+        body, content_type = resolve_uri(uri)
+
+
+def test_resolve_uri_non_string():
+    """non string error"""
+    uri = 333
+    with pytest.raises(TypeError):
+        body, content_type = resolve_uri(uri)
 
 
 def test_server_200(GET_request_right_protocal):
