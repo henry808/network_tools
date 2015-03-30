@@ -33,11 +33,15 @@ def echo_server():
                 request += msg_part
             try:
                 parsed_request = parse_request(request)
-                response = response_ok()
+                response = response_ok(parsed_request)
             except HTTPError400:
                 response = response_error(400, 'Bad Request')
+            except HTTPError404:
+                response = response_error(405, 'Not Found')
             except HTTPError405:
                 response = response_error(405, 'Method not allowed')
+            except HTTPError415:
+                response = response_error(415, 'Unsupported media type')
             except HTTPError505:
                 response = response_error(505, 'HTTP version not supported')
             conn.sendall(response)
@@ -58,7 +62,7 @@ def resolve_uri(uri):
     Raises an IO error if cannot find a mimetype.
     """
     if not isinstance(uri, str):
-        raise TypeError('URI not a string: ' + str(uri))
+        raise HTTPError404('Not found')
     if os.path.isfile(uri):  # if uri is a file
         extension = os.path.splitext(uri)
         content_type = mimetypes.types_map[extension[1]]
@@ -69,7 +73,7 @@ def resolve_uri(uri):
                 with io.open(uri, 'rb') as file1:
                     body = file1.read()
         else:
-            raise IOError('Do not recognize mimetype.')
+            raise HTTPError415('Unsupported media type')
     elif os.path.isdir(uri):  # if uri is a directory
         content_type = 'directory'
         dir_list = os.listdir(uri)
@@ -77,15 +81,16 @@ def resolve_uri(uri):
             dir_list[index] = "<li>{}</li>".format(item)
         body = "<ul>{}</ul>".format("".join(dir_list))
     else:  # if uri is not a dir or a file
-        raise IOError('Not a file or directory.')
+        raise HTTPError404('Not found')
     return body, content_type
 
 
-def response_ok(body='', content_type=''):
+def response_ok(uri):
     """return a well formed HTTP "200 OK" response as a byte string
     """
+    body, content_type = resolve_uri(uri)
     if content_type == 'text/plain' or content_type == 'text/html':
-        content_type = "".join(content_type, '; charset=utf-8')
+        content_type = "".join([content_type, '; charset=utf-8'])
         body = body.encode('utf-8')
 
     lines = [
@@ -154,7 +159,15 @@ class HTTPError400(HTTPError):
     pass
 
 
+class HTTPError404(HTTPError):
+    pass
+
+
 class HTTPError405(HTTPError):
+    pass
+
+
+class HTTPError415(HTTPError):
     pass
 
 
