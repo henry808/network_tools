@@ -2,19 +2,84 @@ import pytest
 from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
 from echo_server import HTTPError505, HTTPError400, HTTPError405
-from echo_server import resolve_uri
+from echo_server import resolve_uri, HTTPError404, HTTPError415
 import io
 
 
-def test_resolve_uri_directory():
+
+
+def test_response_ok_directory(directory_list):
+    "directory returns list"
+    uri = 'webroot'
+    response = response_ok(uri)
+    dir_list = directory_list
+    assert 'HTTP/1.1 200 OK' in response
+    assert 'Content-Type: directory; charset=utf-8' in response
+    assert '' in response
+    assert dir_list in response
+
+
+def test_response_ok_text():
+    "text file"
+    uri = 'webroot/sample.txt'
+    response = response_ok(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+        size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in response
+    assert 'Content-Type: text/plain; charset=utf-8' in response
+    assert 'Content-Length: {}'.format(size) in response
+    assert '' in response
+    assert expected_body in response
+
+
+def test_response_ok_html():
+    "text file"
+    uri = 'webroot/a_web_page.html'
+    response = response_ok(uri)
+    with io.open(uri, 'r') as file1:
+        expected_body = file1.read()
+        size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in response
+    assert 'Content-Type: text/html; charset=utf-8' in response
+    assert 'Content-Length: {}'.format(size) in response
+    assert '' in response
+    assert expected_body in response
+
+
+def test_response_ok_jpg_image():
+    "jpg file"
+    uri = 'webroot/images/JPEG_example.jpg'
+    response = response_ok(uri)
+    with io.open(uri, 'rb') as file1:
+        expected_body = file1.read()
+        size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in response
+    assert 'Content-Type: image/jpeg; charset=utf-8' in response
+    assert 'Content-Length: {}'.format(size) in response
+    assert '' in response
+    assert expected_body in response
+
+
+def test_response_ok_png_image():
+    "png file"
+    uri = 'webroot/images/sample_1.png'
+    response = response_ok(uri)
+    with io.open(uri, 'rb') as file1:
+        expected_body = file1.read()
+        size = len(expected_body)
+    assert 'HTTP/1.1 200 OK' in response
+    assert 'Content-Type: image/png; charset=utf-8' in response
+    assert 'Content-Length: {}'.format(size) in response
+    assert '' in response
+    assert expected_body in response
+
+
+def test_resolve_uri_directory(directory_list):
     """directory"""
     uri = 'webroot'
     body, content_type = resolve_uri(uri)
-    listing = ['.DS_Store', 'a_web_page.html', 'images', 'make_time.py', 'sample.txt']
-    for index, item in enumerate(listing):
-        listing[index] = "<li>{}</li>".format(item)
-    expected_body = "<ul>{}</ul>".format("".join(listing))
-    print expected_body
+    expected_body = directory_list
     assert body == expected_body
     assert content_type == 'directory'
 
@@ -72,23 +137,31 @@ def test_resolve_uri_png():
 def test_resolve_uri_empty_string():
     """empty string io error"""
     uri = ''
-    with pytest.raises(IOError):
+    with pytest.raises(HTTPError404('Not found')):
+        body, content_type = resolve_uri(uri)
+
+
+def test_resolve_uri_non_string():
+    """non string error"""
+    uri = 'test.gif'
+    with pytest.raises(HTTPError415):
         body, content_type = resolve_uri(uri)
 
 
 def test_resolve_uri_non_string():
     """non string error"""
     uri = 333
-    with pytest.raises(TypeError):
+    with pytest.raises(HTTPError404):
         body, content_type = resolve_uri(uri)
     uri = {'notstring': 'not a string'}
-    with pytest.raises(TypeError):
+    with pytest.raises(HTTPError404):
         body, content_type = resolve_uri(uri)
+
 
 def test_resolve_uri_non_existing_file():
     """file or directory does not exist error"""
     uri = 'this_file_does_not_exist.txt'
-    with pytest.raises(IOError):
+    with pytest.raises(HTTPError404):
         body, content_type = resolve_uri(uri)
 
 
@@ -132,13 +205,6 @@ def test_server_505(GET_request_wrong_protocal):
     text = GET_request_wrong_protocal
     assert '505' in echo_client(text)
     assert 'HTTP version not supported' in echo_client(text)
-
-
-def test_response_ok():
-    """Test returns ok response"""
-    assert 'HTTP/1.1 200 OK' in response_ok()
-    assert 'Content-Type: text/xml; charset=utf-8' in response_ok()
-    assert '<html><body><h1>Successful response.</h1></body></html>' in response_ok()
 
 
 def test_response_error():
@@ -189,7 +255,7 @@ def test_parse_wrong_protocal(POST_request_wrong_protocal):
 def test_parse_good(GET_request_right_protocal):
     """GET request right protocal: return the URI"""
     request = parse_request(GET_request_right_protocal)
-    assert request == "/index.html"
+    assert request == "webroot/sample.txt"
 
 
 # requests used for testing
@@ -204,7 +270,7 @@ def empty_request():
 @pytest.fixture(scope='function')
 def GET_request_right_protocal():
     lines = [
-        "GET /index.html HTTP/1.1",
+        "GET webroot/sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "<body>This is a legal request</body>",
@@ -216,7 +282,7 @@ def GET_request_right_protocal():
 @pytest.fixture(scope='function')
 def GET_request_wrong_protocal():
     lines = [
-        "GET /index.html IMAPS",
+        "GET webroot/sample.txt IMAPS",
         "Host: www.test.com",
         "",
         "This test had a bad protocal",
@@ -228,7 +294,7 @@ def GET_request_wrong_protocal():
 @pytest.fixture(scope='function')
 def POST_request_right_protocal():
     lines = [
-        "POST /index.html HTTP/1.1",
+        "POST webroot/sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "This test is a well formed POST request.",
@@ -240,7 +306,7 @@ def POST_request_right_protocal():
 @pytest.fixture(scope='function')
 def POST_request_wrong_protocal():
     lines = [
-        "POST /index.html IMAPS",
+        "POST webroot/sample.txt IMAPS",
         "Host: www.test.com",
         "",
         "This request is a POST Request with a bad protocal.",
@@ -251,7 +317,7 @@ def POST_request_wrong_protocal():
 @pytest.fixture(scope='function')
 def GET_request_missing_blank_line_before_body():
     lines = [
-        "GET /index.html HTTP/1.1",
+        "GET webroot/sample.txt HTTP/1.1",
         "Host: www.test.com",
         "<body>This is a malformed request missing a blank line.</body>",
         "\r\n"
@@ -261,9 +327,18 @@ def GET_request_missing_blank_line_before_body():
 @pytest.fixture(scope='function')
 def GET_request_is_missing_a_body():
     lines = [
-        "GET /index.html HTTP/1.1",
+        "GET webroot/sample.txt HTTP/1.1",
         "Host: www.test.com",
         "",
         "\r\n"
     ]
     return "\r\n".join(lines)
+
+
+@pytest.fixture(scope='function')
+def directory_list():
+    listing = ['.DS_Store', 'a_web_page.html', 'images', 'make_time.py', 'sample.txt']
+    for index, item in enumerate(listing):
+        listing[index] = "<li>{}</li>".format(item)
+    body = "<ul>{}</ul>".format("".join(listing))
+    return body
