@@ -2,7 +2,19 @@ import pytest
 from echo_client import echo_client
 from echo_server import response_ok, response_error, parse_request
 from echo_server import HTTPError505, HTTPError400, HTTPError405
+from echo_server import resolve_uri
 
+def test_resolve_uri_directory():
+    """"""
+    uri = 'webroot'
+    body, content_type = resolve_uri(uri)
+    listing = ['a_web_page.html', 'images', 'make_time.py', 'sample.txt']
+    for index, item in enumerate(listing):
+        listing[index] = "<li>{}</li>".format(item)
+    expected_body = "<ul>{}</ul>".format("".join(listing))
+    print expected_body
+    assert body == expected_body
+    assert content_type == 'directory'
 
 def test_server_200(GET_request_right_protocal):
     """Test that a good request returns 200"""
