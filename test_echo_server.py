@@ -137,13 +137,13 @@ def test_resolve_uri_png():
 def test_resolve_uri_empty_string():
     """empty string io error"""
     uri = ''
-    with pytest.raises(HTTPError404('Not found')):
+    with pytest.raises(HTTPError404):
         body, content_type = resolve_uri(uri)
 
 
-def test_resolve_uri_non_string():
+def test_resolve_uri_unsupported_mimetype():
     """non string error"""
-    uri = 'test.gif'
+    uri = 'webroot/images/test.gif'
     with pytest.raises(HTTPError415):
         body, content_type = resolve_uri(uri)
 
@@ -445,6 +445,7 @@ def POST_request_wrong_protocal():
     ]
     return "\r\n".join(lines)
 
+
 @pytest.fixture(scope='function')
 def GET_request_missing_blank_line_before_body():
     lines = [
@@ -454,6 +455,7 @@ def GET_request_missing_blank_line_before_body():
         "\r\n"
     ]
     return "\r\n".join(lines)
+
 
 @pytest.fixture(scope='function')
 def GET_request_is_missing_a_body():

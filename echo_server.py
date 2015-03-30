@@ -11,7 +11,7 @@ import os
 import mimetypes
 
 BUFFERSIZE = 32
-
+ROOT_DIR = "./"
 
 def echo_server():
     server_socket = socket.socket(
@@ -61,14 +61,19 @@ def resolve_uri(uri):
     Raises an IO error if the uri is not a file or directory.
     Raises an IO error if cannot find a mimetype.
     """
-    if not isinstance(uri, str):
+    if not isinstance(uri, str) or uri == '':
         raise HTTPError404('Not found')
-    if os.path.isfile(uri):  # if uri is a file
-        extension = os.path.splitext(uri)
+    uri = os.path.join(ROOT_DIR, uri)
+    extension = os.path.splitext(uri)
+    print "uri and extension: " + str(uri) + " " + str(extension)
+    try:
         content_type = mimetypes.types_map[extension[1]]
+    except KeyError:
+        content_type = ''
+    if os.path.isfile(uri):  # if uri is a file
         if content_type == 'text/plain' or content_type == 'text/html':
                 with io.open(uri, 'r') as file1:
-                    body = file1.read()  
+                    body = file1.read()
         elif content_type == 'image/jpeg' or content_type == 'image/png':
                 with io.open(uri, 'rb') as file1:
                     body = file1.read()
