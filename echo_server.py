@@ -63,29 +63,30 @@ def resolve_uri(uri):
     Raises an IO error if the uri is not a file or directory.
     Raises an IO error if cannot find a mimetype.
     """
-    if not isinstance(uri, str):
-        raise HTTPError404('Not found')
+    uri = uri.lstrip('/')
     uri = os.path.join(ROOT_DIR, uri)
     extension = os.path.splitext(uri)
     try:
         content_type = mimetypes.types_map[extension[1]]
     except KeyError:
-        content_type = ''
+        # assume if it is text if can't determine mimetype
+        content_type = 'text/plain'
     if os.path.isfile(uri):  # if uri is a file
-        if content_type == 'text/plain' or content_type == 'text/html':
-                with io.open(uri, 'r') as file1:
-                    body = file1.read()
-        elif content_type == 'image/jpeg' or content_type == 'image/png':
-                with io.open(uri, 'rb') as file1:
-                    body = file1.read()
-        else:
+        legal_content_types = ['text/plain',
+                               'text/html',
+                               'image/jpeg',
+                               'image/png']
+        if content_type not in legal_content_types:
             raise HTTPError415('Unsupported media type')
+        with io.open(uri, 'rb') as file1:
+            body = file1.read()
     elif os.path.isdir(uri):  # if uri is a directory
         content_type = 'directory'
         dir_list = os.listdir(uri)
-        for index, item in enumerate(dir_list):
-            dir_list[index] = "<li>{}</li>".format(item)
-        body = "<ul>{}</ul>".format("".join(dir_list))
+        html_dir_list = []
+        for item in dir_list:
+            html_dir_list.append("<li>{}</li>".format(item))
+        body = "<ul>{}</ul>".format("".join(html_dir_list))
     else:  # if uri is not a dir or a file
         raise HTTPError404('Not found')
     return body, content_type

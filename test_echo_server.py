@@ -152,16 +152,6 @@ def test_resolve_uri_unsupported_mimetype():
         body, content_type = resolve_uri(uri)
 
 
-def test_resolve_uri_non_string():
-    """non string error"""
-    uri = 333
-    with pytest.raises(HTTPError404):
-        body, content_type = resolve_uri(uri)
-    uri = {'notstring': 'not a string'}
-    with pytest.raises(HTTPError404):
-        body, content_type = resolve_uri(uri)
-
-
 def test_resolve_uri_non_existing_file():
     """file or directory does not exist error"""
     uri = 'this_file_does_not_exist.txt'
