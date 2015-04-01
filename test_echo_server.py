@@ -159,7 +159,7 @@ def test_resolve_uri_non_existing_file():
         body, content_type = resolve_uri(uri)
 
 
-# server reponse tests
+# server response tests
 def test_server_dir(GET_request_webroot, directory_list):
     """Test a server resonse for a directory """
     text = GET_request_webroot
